@@ -20,7 +20,6 @@ class Objective:
         self.env = env
         self.agent = agent
         self.stime = stime
-        self.plotter = Plotter(self.env)
     
     def __call__(self, theta, plot=False):
         ''' Call operator runnning a single episode.
@@ -39,14 +38,16 @@ class Objective:
         self.agent.setParams(theta)
         self.agent.reset()
         status = self.env.reset()
+        if plot == True: self.plotter = Plotter(self.env)
         for t in range(self.stime):
             action = self.agent.step(status)
             status, reward = self.env.step(action)
             rews[t] = reward
 
-            if plot == True:
-                self.plotter.update()
-            
+            if plot == True: self.plotter.update()
+        
+        if plot == True: self.plotter.close()
+         
         return rews
 
 if __name__ == "__main__":

@@ -167,6 +167,9 @@ class Plotter:
         self.retina.set_array(self.env.status.reshape(1,-1))
         plt.pause(0.02) 
 
+    def close(self):
+        plt.close(self.figure)
+
 if __name__ == "__main__":
 
     plt.ion()
