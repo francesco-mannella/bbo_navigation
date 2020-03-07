@@ -1,5 +1,6 @@
 from esn import ESN
 import numpy as np
+import yaml
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -15,13 +16,23 @@ class Agent:
         self.echo = ESN(
             N       = self.num_units,
             dt      = 1.0,
-            tau     = 10.0,
-            alpha   = 0.3,
-            beta    = 0.7,
+            tau     = 5.0,
+            alpha   = 0.1,
+            beta    = 0.9,
             epsilon = 1.0e-10)
         
         self.input_weights = np.random.randn(self.num_inputs, self.num_units)
         self.out_weights = np.random.randn(self.num_units, self.num_actions)
+
+    def save(self, filename):
+        with open(filename, "w") as f:
+            yaml.dump(self, f)
+
+    @staticmethod
+    def load(filename):
+        with open(filename, "r") as f:
+            return yaml.load(f)
+
 
     def setParams(self, params):
 
@@ -57,9 +68,10 @@ class ArenaEnv:
         self.xlims = np.array([-1, 1])
         self.ylims = np.array([-1, 1])
         self.rew = np.zeros(2)
-        self.rew_sigma = 0.1
+        self.rew_sigma = 0.6
 
         self.reset()
+        self.t = 0
 
     def getReward(self):
         dist = np.exp(-0.5*(self.rew_sigma**-2)*np.linalg.norm(self.position - self.rew)**2)
@@ -80,12 +92,13 @@ class ArenaEnv:
         rel_angle = correct_angle(direction - angle - np.pi/2) 
         idx = int((rel_angle/np.pi)*10)
         status = np.arange(self.status_size)
-        status = np.exp(-0.5*((1e-2+dist)**-2)*(status - idx)**2)
-        
+        status = np.exp(-0.5*((1e-2+4*dist)**-2)*(status - idx)**2)
+
         return status
 
     def reset(self):
-        
+        self.t = 0        
+        self.rew = np.zeros(2)
         self.position = np.array([
                 np.random.uniform(*self.xlims),
                 np.random.uniform(*self.ylims)])
@@ -106,6 +119,8 @@ class ArenaEnv:
                 status (array): the current retina status
                 reward (float): value of the current reward
         '''
+        self.rew = 1.*np.hstack([np.cos(self.t/10.0), np.sin(self.t/10.0)])
+        self.t += 1
 
         dang, dlen = action
         self.direction += dang

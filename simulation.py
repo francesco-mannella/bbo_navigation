@@ -58,13 +58,13 @@ if __name__ == "__main__":
     
     num_rollouts = 30
     lmb = 0.0001
-    stime = 100
+    stime = 150
     sigma = 0.001
     epochs = 200
-    num_agent_units = 100
-    sigma_decay_amp = 0.0
-    sigma_decay_period = 0.1
-
+    num_agent_units = 200
+    sigma_decay_amp = 0.01
+    sigma_decay_period = 0.3
+    max_rews = 0
 
     env = ArenaEnv()
 
@@ -83,7 +83,6 @@ if __name__ == "__main__":
             sigma_decay_period=sigma_decay_period,
             cost_func=objective)
    
-
     rew_fig = plt.figure()
     ax = rew_fig.add_subplot(111)
 
@@ -94,6 +93,10 @@ if __name__ == "__main__":
             rews.mean(), rews.max()))
         
         epochs_rews[e,:] = np.hstack([np.min(rews), np.mean(rews), np.max(rews)])
+        
+        if epochs_rews[e,2] > max_rews:
+            max_rews = epochs_rews[e,2]
+            agent.save("agent.dump")
 
         if e%10 == 0:
             objective(bbo.theta, plot=True)
@@ -107,6 +110,3 @@ if __name__ == "__main__":
                     epochs_rews[:(e+1), 1],
                     lw=3, c=[.4, .4 ,1])
             plt.pause(0.02)
-
-            
-
