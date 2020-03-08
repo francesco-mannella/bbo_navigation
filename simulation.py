@@ -94,8 +94,8 @@ if __name__ == "__main__":
         
         epochs_rews[e,:] = np.hstack([np.min(rews), np.mean(rews), np.max(rews)])
         
-        if epochs_rews[e,2] > max_rews:
-            max_rews = epochs_rews[e,2]
+        if epochs_rews[e,1] > max_rews:
+            max_rews = epochs_rews[e,1]
             agent.save("agent.dump")
 
         if e%10 == 0:

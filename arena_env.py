@@ -31,7 +31,7 @@ class Agent:
     @staticmethod
     def load(filename):
         with open(filename, "r") as f:
-            return yaml.load(f)
+            return yaml.load(f, Loader=yaml.UnsafeLoader)
 
 
     def setParams(self, params):
