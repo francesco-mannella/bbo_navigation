@@ -37,7 +37,6 @@ class Agent:
         with open(filename, "r") as f:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
 
-
     def setParams(self, params):
 
         self.out_weights = params.reshape(self.num_units, self.num_actions).copy()
