@@ -67,7 +67,9 @@ class Objective:
         status = np.zeros(self.agent.num_actions)
         if show == True or save == True: self.plotter = Plotter(self.env, show=show, save=save)
         for t in range(self.stime):
-            action = self.agent.step(status)
+            a  = t/self.stime
+            b =  1 - a
+            action = self.agent.step(np.hstack((a,b,status)))
             _, reward = self.env.step(action)
             status = np.copy(action)
             rews[t] = reward
@@ -112,7 +114,7 @@ class Simulation:
 
         self.num_params = self.env.num_actions * self.num_agent_units
         self.agent = Agent( num_params=self.num_params,
-            num_inputs=self.env.num_actions, 
+            num_inputs=self.env.num_actions+2, 
             num_actions=self.env.num_actions) 
 
         self.objective = Objective(self.env, self.agent, self.stime)
