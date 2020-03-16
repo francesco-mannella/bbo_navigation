@@ -144,10 +144,10 @@ class Simulation:
                 self.objective(self.bbo.theta, show=self.show, save=self.save)
                 self.plot_step(e, epochs_rews)
 
-            if self.show:
-                self.render()
-            if self.save:
-                self.rew_fig.savefig("rewards.png")
+                if self.show:
+                    self.render()
+                if self.save:
+                    self.rew_fig.savefig("rewards.png")
 
 
 if __name__ == "__main__":
