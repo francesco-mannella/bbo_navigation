@@ -21,13 +21,14 @@ class Objective:
         self.agent = agent
         self.stime = stime
     
-    def __call__(self, theta, plot=False):
+    def __call__(self, theta, show=False, save=False):
         ''' Call operator runnning a single episode.
             
             Args:
                 
                 theta (array): parameters the agent is set to at beginning of episode
-                plot (bool): whether rendering is enabled or not
+                show (bool): whether rendering is enabled or not
+                save (bool): whether saving frames on file
 
             Returns:
 
@@ -38,24 +39,39 @@ class Objective:
         self.agent.setParams(theta)
         self.agent.reset()
         status = self.env.reset()
-        if plot == True: self.plotter = Plotter(self.env)
+        if show == True or save == True: self.plotter = Plotter(self.env, show=show, save=save)
         for t in range(self.stime):
             action = self.agent.step(status)
             status, reward = self.env.step(action)
             rews[t] = reward
 
-            if plot == True: self.plotter.update()
+            if show == True or save == True: self.plotter.update()
         
-        if plot == True: self.plotter.close()
+        if show == True or save == True: self.plotter.close()
          
         return rews
+
+
+def reset_dirs(dirs):
+    import os, glob
+
+    for d in dirs:
+        if not os.path.exists(d):
+            os.makedirs(d)
+        files = glob.glob(d + os.sep + "*")
+        for f in files:
+            if(os.path.isfile(f)):
+                os.remove(f)
+
 
 if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
-
-    plt.ion()
+    reset_dirs(["frames"])
     
+    show = True
+    save = True
+
     num_rollouts = 30
     lmb = 0.0001
     stime = 150
@@ -99,7 +115,7 @@ if __name__ == "__main__":
             agent.save("agent.dump")
 
         if e%10 == 0:
-            objective(bbo.theta, plot=True)
+            objective(bbo.theta, show=show, save=save)
             ax.clear()
             ax.set_title("Rewards")
             ax.fill_between(np.arange(e+1), 
@@ -109,4 +125,10 @@ if __name__ == "__main__":
             ax.plot(np.arange(e+1), 
                     epochs_rews[:(e+1), 1],
                     lw=3, c=[.4, .4 ,1])
-            plt.pause(0.02)
+
+            if show:
+                plt.pause(0.01)
+
+            if save:
+                rew_fig.savefig("rewards.png")
+            

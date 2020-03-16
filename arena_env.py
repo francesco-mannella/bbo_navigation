@@ -142,12 +142,17 @@ class Plotter:
     """ Manages the plotting of the environment
     """
 
-    def __init__(self, env):
+    def __init__(self, env, save=False, show=True):
         """ 
             Args:
                 
                 env (ArenaEnv): the 2D environment
+                save (bool): save frames to file
+                show (bool): show frames on screen
         """
+
+        self.save = save
+        self.show = show
 
         self.env = env
         self.figure = plt.figure(figsize=(4,6))
@@ -168,7 +173,8 @@ class Plotter:
                 cmap=plt.cm.binary, vmin=-0.2, vmax=1)
         self.retina_ax.set_axis_off()
 
-        self.update()
+        if self.save:
+            self.t = 0
 
     def update(self):
 
@@ -180,7 +186,14 @@ class Plotter:
                 np.sin(2*np.pi*self.env.direction)])])
         self.dir.set_data(*curr_dir.T)
         self.retina.set_array(self.env.status.reshape(1,-1))
-        plt.pause(0.02) 
+        
+        if self.save:
+            self.figure.savefig("frames/frame{:04d}.png".format(self.t))
+            self.t += 1
+
+        if self.show: 
+            plt.pause(0.02) 
+        
 
     def close(self):
         plt.close(self.figure)
