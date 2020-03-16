@@ -163,7 +163,7 @@ class Simulation:
             if e%10 == 0:
                 self.objective(self.bbo.theta, show=self.show, save=self.save)
                 self.plot_step(e, epochs_rews)
-                if self.show
+                if self.show:
                     self.render()
                 if self.save:
                     self.rew_fig.savefig("rewards.png")
