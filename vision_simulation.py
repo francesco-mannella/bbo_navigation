@@ -64,71 +64,87 @@ def reset_dirs(dirs):
                 os.remove(f)
 
 
-if __name__ == "__main__":
-    
-    import matplotlib.pyplot as plt
-    reset_dirs(["frames"])
-    
-    show = True
-    save = True
+class Simulation:
 
-    num_rollouts = 30
-    lmb = 0.0001
-    stime = 150
-    sigma = 0.001
-    epochs = 200
-    num_agent_units = 200
-    sigma_decay_amp = 0.0
-    sigma_decay_period = 0.3
-    max_rews = 0
+    def __init__(self):    
 
-    env = ArenaEnv()
+        self.show = True
+        self.save = True
 
-    num_params = env.num_actions * num_agent_units
-    agent = Agent(
-            num_params=num_params, 
-            num_inputs=env.status_size, 
-            num_actions=env.num_actions)    
+        self.num_rollouts = 30
+        self.lmb = 0.0001
+        self.stime = 150
+        self.sigma = 0.001
+        self.epochs = 200
+        self.num_agent_units = 200
+        self.sigma_decay_amp = 0.0
+        self.sigma_decay_period = 0.3
+        self.max_rews = 0
 
-    objective = Objective(env, agent, stime)
+        self.env = ArenaEnv()
 
-    bbo = BBO(num_params=num_params,
-            num_rollouts=num_rollouts, lmb=lmb,
-            epochs=epochs, sigma=sigma,
-            sigma_decay_amp=sigma_decay_amp,
-            sigma_decay_period=sigma_decay_period,
-            cost_func=objective)
-   
-    rew_fig = plt.figure()
-    ax = rew_fig.add_subplot(111)
-
-    epochs_rews = np.zeros([epochs, 3])
-    for e in range(epochs):
-        rews = bbo.iteration()
-        print((("{:d} ")+("{:.4f} ")*2).format(e, 
-            rews.mean(), rews.max()))
+        self.num_params = self.env.num_actions * self.num_agent_units
+        self.agent = Agent( num_params=self.num_params,
+                num_inputs=self.env.status_size,
+                num_actions=self.env.num_actions)    
+        self.objective = Objective(self.env, self.agent, self.stime)
         
-        epochs_rews[e,:] = np.hstack([np.min(rews), np.mean(rews), np.max(rews)])
+        self.bbo = BBO(num_params=self.num_params,
+            num_rollouts=self.num_rollouts, lmb=self.lmb,
+            epochs=self.epochs, sigma=self.sigma,
+            sigma_decay_amp=self.sigma_decay_amp,
+            sigma_decay_period=self.sigma_decay_period,
+            cost_func=self.objective)
+
+        self.init_plot()
+
+    def init_plot(self):
+        self.rew_fig = plt.figure()
+        self.ax = self.rew_fig.add_subplot(111)
+
+    def plot_step(self, e, epochs_rews):
+        self.ax.clear()
+        self.ax.set_title("Rewards")
+        self.ax.fill_between(np.arange(e+1), 
+                epochs_rews[:(e+1), 0],
+                epochs_rews[:(e+1), 2],
+                facecolor=[.8, .8, 1], edgecolor=[.6,.6,1])
+        self.ax.plot(np.arange(e+1), 
+                epochs_rews[:(e+1), 1],
+                lw=3, c=[.4, .4 ,1])
+
+    def render(self):
+        plt.pause(0.01)
+
+    def run(self):
         
-        if epochs_rews[e,1] > max_rews:
-            max_rews = epochs_rews[e,1]
-            agent.save("agent.dump")
-
-        if e%10 == 0:
-            objective(bbo.theta, show=show, save=save)
-            ax.clear()
-            ax.set_title("Rewards")
-            ax.fill_between(np.arange(e+1), 
-                    epochs_rews[:(e+1), 0],
-                    epochs_rews[:(e+1), 2],
-                    facecolor=[.8, .8, 1], edgecolor=[.6,.6,1])
-            ax.plot(np.arange(e+1), 
-                    epochs_rews[:(e+1), 1],
-                    lw=3, c=[.4, .4 ,1])
-
-            if show:
-                plt.pause(0.01)
-
-            if save:
-                rew_fig.savefig("rewards.png")
+        max_rews = 0
+        epochs_rews = np.zeros([self.epochs, 3])
+        for e in range(self.epochs):
+            rews = self.bbo.iteration()
+            print((("{:d} ")+("{:.4f} ")*2).format(e, 
+                rews.mean(), rews.max()))
             
+            epochs_rews[e,:] = np.hstack([np.min(rews), np.mean(rews), np.max(rews)])
+            
+            if epochs_rews[e,1] > max_rews:
+                max_rews = epochs_rews[e,1]
+                self.agent.save("agent.dump")
+
+            if e%10 == 0:
+                self.objective(self.bbo.theta, show=self.show, save=self.save)
+                self.plot_step(e, epochs_rews)
+
+            if self.show:
+                self.render()
+            if self.save:
+                self.rew_fig.savefig("rewards.png")
+
+
+if __name__ == "__main__":
+
+    import matplotlib.pyplot as plt
+    
+    sim = Simulation()
+
+    sim.run()
