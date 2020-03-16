@@ -62,7 +62,7 @@ if __name__ == "__main__":
     sigma = 0.001
     epochs = 200
     num_agent_units = 200
-    sigma_decay_amp = 0.01
+    sigma_decay_amp = 0.0
     sigma_decay_period = 0.3
     max_rews = 0
 
