@@ -1,7 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-from bbo import BBO
-from arena_env import Agent, ArenaEnv, Plotter
+if __package__ is None or __package__ == "":
+    from bbo import BBO
+    from arena_env import Agent, ArenaEnv, Plotter
+else:
+    from bbo_navigation.bbo import BBO
+    from bbo_navigation.arena_env import Agent, ArenaEnv, Plotter
+
 
 class Objective:
     ''' Defines a callable object to be used by the BBO object
@@ -68,6 +74,8 @@ class Simulation:
 
     def __init__(self):    
 
+        reset_dirs(["frames"])
+
         self.show = True
         self.save = True
 
@@ -101,6 +109,7 @@ class Simulation:
     def init_plot(self):
         self.rew_fig = plt.figure()
         self.ax = self.rew_fig.add_subplot(111)
+
 
     def plot_step(self, e, epochs_rews):
         self.ax.clear()

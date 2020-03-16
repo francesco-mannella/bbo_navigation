@@ -1,4 +1,8 @@
-from esn import ESN
+if __package__ is None or __package__ == "":
+    from esn import ESN
+else:
+    from bbo_navigation.esn import ESN
+
 import numpy as np
 import yaml
 
