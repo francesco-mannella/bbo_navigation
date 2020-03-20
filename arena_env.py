@@ -20,7 +20,7 @@ class Agent:
         self.echo = ESN(
             N       = self.num_units,
             dt      = 1.0,
-            tau     = 5.0,
+            tau     = 80.0,
             alpha   = 0.1,
             beta    = 0.9,
             epsilon = 1.0e-10)
@@ -72,6 +72,7 @@ class ArenaEnv:
         self.ylims = np.array([-1, 1])
         self.rew = np.zeros(2)
         self.rew_sigma = 0.6
+        self.decay_epochs = 50
 
         self.reset()
         self.t = 0
@@ -122,7 +123,7 @@ class ArenaEnv:
                 status (array): the current retina status
                 reward (float): value of the current reward
         '''
-        self.rew = 1.*np.hstack([np.cos(self.t/10.0), np.sin(self.t/10.0)])
+        self.rew = 1.*np.hstack([np.cos(self.t/3.0), np.sin(self.t/3.0)])
         self.t += 1
 
         dang, dlen = action

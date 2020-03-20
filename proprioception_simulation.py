@@ -13,7 +13,6 @@ class FixedArenaEnv(ArenaEnv):
     
     def __init__(self):
         super(FixedArenaEnv, self).__init__()
-        self.init_rew_sigma = 3
 
     def reset(self):
         self.t = 0        
@@ -69,7 +68,7 @@ class Objective:
         for t in range(self.stime):
             a  = t/self.stime
             b =  1 - a
-            action = self.agent.step(np.hstack((a,b,status)))
+            action = self.agent.step(np.hstack((10*a,10*b,0*status)))
             _, reward = self.env.step(action)
             status = np.copy(action)
             rews[t] = reward
@@ -102,13 +101,13 @@ class Simulation:
 
         self.num_rollouts = 30
         self.lmb = 0.0001
-        self.stime = 150
+        self.stime = 30
         self.sigma = 0.001
         self.epochs = 200
         self.num_agent_units = 200
         self.sigma_decay_amp = 0.0
         self.sigma_decay_period = 0.3
-        self.max_rews = 0
+         
 
         self.env = ArenaEnv()
 
@@ -151,7 +150,10 @@ class Simulation:
         
         max_rews = 0
         epochs_rews = np.zeros([self.epochs, 3])
+        init_rew_sigma = 0.2
         for e in range(self.epochs):
+            rew_sigma = init_rew_sigma*np.exp(-e/(self.epochs*999))
+            self.env.rew_sigma = rew_sigma
             rews = self.bbo.iteration()
             print((("{:d} ")+("{:.4f} ")*2).format(e, 
                 rews.mean(), rews.max()))
